@@ -30,7 +30,7 @@ def main():
 
     for pod in data.get("items", []):
         metadata = pod.get("metadata", {})
-        status = pod.get("status", {})
+        spec = pod.get("spec", {})
         created = parse_time(metadata.get("creationTimestamp"))
         scheduled = scheduled_at(pod)
         latency = ""
@@ -39,7 +39,7 @@ def main():
         writer.writerow([
             metadata.get("namespace", ""),
             metadata.get("name", ""),
-            status.get("nodeName", ""),
+            spec.get("nodeName", ""),
             metadata.get("creationTimestamp", ""),
             scheduled.isoformat() if scheduled else "",
             latency,
@@ -47,4 +47,3 @@ def main():
 
 
 main()
-

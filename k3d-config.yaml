@@ -5,9 +5,3 @@ metadata:
 servers: 1
 agents: 3
 image: rancher/k3s:v1.35.4-k3s1
-registries:
-  create:
-    name: scheduler-lab-registry
-    host: 127.0.0.1
-    hostPort: "5001"
-

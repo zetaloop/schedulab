@@ -8,7 +8,7 @@
 - `pkg/plugins/schedulab` 调度插件，实现了 `QueueSort`、`Filter`、`Score`、`Reserve`、`Permit`、`Bind`、`EnqueueExtensions`、`SignPlugin`。
 - `config/scheduler-config.yaml` 独立的 `KubeSchedulerConfiguration`，定义 `schedulab-scheduler` profile 及其各调度阶段的插件启用配置。
 - `deploy/scheduler.yaml` RBAC、ConfigMap、Deployment 清单。
-- `k3d-config.yaml` k3d 集群定义，1 个 server、3 个 agent、本地 registry 映射到 `127.0.0.1:5001`。
+- `k3d-config.yaml` k3d 集群定义，1 个 server、3 个 agent，固定使用 k3s 1.35。
 - `workloads` 默认调度器和 Schedulab 调度器的同规模对比负载。
 - `scripts` 调度延迟采集、汇总与对比脚本。
 - `Dockerfile` / `Makefile` 构建与镜像打包。
@@ -131,4 +131,3 @@ k3d cluster delete scheduler-lab
 - `results/default-latency.csv` 和 `results/schedulab-latency.csv`：每个 Pod 的 `PodScheduled` 延迟。
 - `results/summary.txt`：平均、p50、p95、最大延迟和节点分布汇总。
 - 两种 workload 分别对应默认调度器和 `schedulerName: schedulab-scheduler`。
-
