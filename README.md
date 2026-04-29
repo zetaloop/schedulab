@@ -22,6 +22,8 @@
 - kubectl
 - Go 1.26
 
+k3d 默认使用最新的 k3s stable 镜像，可通过 `k3d-config.yaml` 指定版本。本项目要求 k3s 1.34 以上（调度器依赖 `resource.k8s.io` API）。
+
 ## 完整流程
 
 以下从零搭建集群、部署调度器、运行对比，最后清理。
@@ -45,23 +47,29 @@ make build
 k3d cluster create --config k3d-config.yaml
 ```
 
-这会创建一个名为 `scheduler-lab` 的集群，内含一个本地 registry `scheduler-lab-registry`，监听 `127.0.0.1:5001`。
+集群创建后，k3d 会把 kubeconfig 写入 `~/.kube/config` 并切换上下文。由于各系统上 `host.docker.internal` 和代理配置可能干扰连接，部署前先做一次显式修正：
+
+```bash
+PORT=$(docker inspect k3d-scheduler-lab-serverlb --format '{{(index (index .NetworkSettings.Ports "6443/tcp") 0).HostPort}}')
+kubectl config set-cluster k3d-scheduler-lab --server="https://127.0.0.1:$PORT"
+```
+
+这个步骤将 kubeconfig 中的 server 地址改为本地回环地址和 Docker 分配的实际端口，绕过 DNS 和代理的影响。
 
 确认集群就绪：
 
 ```bash
-k3d cluster list
 kubectl get nodes
 ```
 
-### 3. 构建镜像并推送到本地 registry
+### 3. 构建镜像并导入集群
 
 ```bash
 docker build -t localhost:5001/schedulab-scheduler:latest .
-docker push localhost:5001/schedulab-scheduler:latest
+k3d image import localhost:5001/schedulab-scheduler:latest -c scheduler-lab
 ```
 
-k3d 集群内部也能通过 `localhost:5001` 拉取这个 registry 中的镜像。
+`k3d image import` 将镜像直接注入集群的所有节点，无需通过 registry 中转，避免了本地网络配置差异带来的推送/拉取问题。
 
 如果改了镜像名或 tag，同步更新 `deploy/scheduler.yaml` 中容器的 image 字段。
 

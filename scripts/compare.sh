@@ -16,8 +16,10 @@ run_case() {
   kubectl delete -f "$manifest" --ignore-not-found
   kubectl apply -f "$manifest"
   kubectl -n "$NS" rollout status "deployment/$deployment" --timeout=180s
+  kubectl -n "$NS" wait --for=condition=Ready pods -l "app=$deployment" --timeout=60s
+  sleep 3
   kubectl -n "$NS" get pods -l "app=$deployment" -o json > "$OUT/$name-pods.json"
-  scripts/collect-scheduling-latency.py "$OUT/$name-pods.json" > "$OUT/$name-latency.csv"
+  scripts/collect-scheduling-latency.py "$OUT/$name-pods.json" | sort -t, -k2 > "$OUT/$name-latency.csv"
   kubectl delete -f "$manifest" --ignore-not-found
 }
 

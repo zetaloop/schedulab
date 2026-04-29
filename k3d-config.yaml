@@ -4,6 +4,7 @@ metadata:
   name: scheduler-lab
 servers: 1
 agents: 3
+image: rancher/k3s:v1.35.4-k3s1
 registries:
   create:
     name: scheduler-lab-registry
