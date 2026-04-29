@@ -5,24 +5,42 @@ leaderElection:
 profiles:
   - schedulerName: schedulab-scheduler
     plugins:
+      preEnqueue:
+        disabled:
+          - name: DynamicResources
       queueSort:
         disabled:
           - name: "*"
         enabled:
           - name: Schedulab
+      preFilter:
+        disabled:
+          - name: DynamicResources
       filter:
+        disabled:
+          - name: DynamicResources
         enabled:
           - name: Schedulab
+      postFilter:
+        disabled:
+          - name: DynamicResources
       score:
+        disabled:
+          - name: DynamicResources
         enabled:
           - name: Schedulab
             weight: 2
       reserve:
+        disabled:
+          - name: DynamicResources
         enabled:
           - name: Schedulab
       permit:
         enabled:
           - name: Schedulab
+      preBind:
+        disabled:
+          - name: DynamicResources
       bind:
         disabled:
           - name: DefaultBinder
