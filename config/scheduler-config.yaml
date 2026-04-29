@@ -1,0 +1,44 @@
+apiVersion: kubescheduler.config.k8s.io/v1
+kind: KubeSchedulerConfiguration
+leaderElection:
+  leaderElect: false
+profiles:
+  - schedulerName: schedulab-scheduler
+    plugins:
+      queueSort:
+        disabled:
+          - name: "*"
+        enabled:
+          - name: Schedulab
+      filter:
+        enabled:
+          - name: Schedulab
+      score:
+        enabled:
+          - name: Schedulab
+            weight: 2
+      reserve:
+        enabled:
+          - name: Schedulab
+      permit:
+        enabled:
+          - name: Schedulab
+      bind:
+        disabled:
+          - name: DefaultBinder
+        enabled:
+          - name: Schedulab
+    pluginConfig:
+      - name: Schedulab
+        args:
+          mode: balanced
+          bindPods: true
+          maxCPUUtilization: 90
+          maxMemoryUtilization: 90
+          cpuWeight: 45
+          memoryWeight: 35
+          spreadWeight: 20
+          permitWaitSeconds: 0
+          permitTimeoutSeconds: 5
+          maxReservationsPerNode: 0
+
