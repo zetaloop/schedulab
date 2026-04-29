@@ -10,7 +10,7 @@
 - `deploy/scheduler.yaml` RBAC、ConfigMap、Deployment 清单。
 - `k3d-config.yaml` k3d 集群定义，1 个 server、3 个 agent，固定使用 k3s 1.35。
 - `workloads` 默认调度器和 Schedulab 调度器的同规模对比负载。
-- `scripts` 调度延迟采集、汇总与对比脚本。
+- `scripts` 调度事件采集、延迟汇总与对比脚本。
 - `Dockerfile` / `Makefile` 构建与镜像打包。
 
 ## 环境
@@ -107,14 +107,14 @@ scripts/compare.sh
 脚本依次完成：
 
 1. 创建 `schedulab-bench` namespace
-2. 部署 30 个 pause Pod 使用默认调度器，等待全部就绪
-3. 采集 Pod 状态写入 `results/default-pods.json`，提取 `PodScheduled` 延迟到 `results/default-latency.csv`
+2. 创建 120 个 pause Pod 使用默认调度器，等待全部完成调度
+3. 并发创建 120 个 Pod，记录每个 Pod 从创建确认到 `spec.nodeName` 出现的客户端观测延迟，并采集 `Scheduled` 事件作为辅助数据
 4. 删除默认调度器的负载
-5. 部署 30 个 pause Pod 使用 `schedulerName: schedulab-scheduler`，等待全部就绪
-6. 采集到了 `results/schedulab-pods.json` 和 `results/schedulab-latency.csv`
+5. 创建 120 个 pause Pod 使用 `schedulerName: schedulab-scheduler`，等待全部完成调度
+6. 写入 `results/schedulab-pods.json`、`results/schedulab-events.json` 和 `results/schedulab-latency.csv`
 7. 汇总两个 CSV，输出 `results/summary.txt`
 
-`summary.txt` 包含每种调度器的已调度 Pod 数、平均延迟、p50、p95、最大值，以及 Pod 在各节点上的分布计数。
+`summary.txt` 包含每种调度器的已调度 Pod 数、从 Pod 创建确认到 `spec.nodeName` 可见的毫秒级平均延迟、p50、p95、最大值，以及 Pod 在各节点上的分布计数。
 
 ### 6. 清理
 
@@ -128,6 +128,6 @@ k3d cluster delete scheduler-lab
 
 - 调度器代码入口 `pkg/plugins/schedulab/plugin.go`，包含 `Less`、`Filter`、`Score`、`Reserve`、`Permit`、`Bind` 实现，以及对应的 `plugin_test.go` 测试用例。
 - 调度器配置 `config/scheduler-config.yaml`，在各阶段启用了 Schedulab 插件。
-- `results/default-latency.csv` 和 `results/schedulab-latency.csv`：每个 Pod 的 `PodScheduled` 延迟。
-- `results/summary.txt`：平均、p50、p95、最大延迟和节点分布汇总。
+- `results/default-latency.csv` 和 `results/schedulab-latency.csv`：每个 Pod 从创建确认到调度完成的客户端观测延迟，以及 `Scheduled` 事件延迟和 `PodScheduled` 条件延迟。
+- `results/summary.txt`：平均、p50、p95、最大调度延迟和节点分布汇总。
 - 两种 workload 分别对应默认调度器和 `schedulerName: schedulab-scheduler`。
