@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: benchmark-default
+  namespace: schedulab-bench
+spec:
+  replicas: 30
+  selector:
+    matchLabels:
+      app: benchmark-default
+  template:
+    metadata:
+      labels:
+        app: benchmark-default
+    spec:
+      terminationGracePeriodSeconds: 0
+      containers:
+        - name: pause
+          image: registry.k8s.io/pause:3.10
+          resources:
+            requests:
+              cpu: 20m
+              memory: 32Mi
+
