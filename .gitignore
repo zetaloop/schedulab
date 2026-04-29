@@ -1,6 +1,6 @@
 bin/
 dist/
 results/
+.ruff_cache/
 *.exe
 *.test
-
